@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кодът на свободата: Георги Раковски</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        .navbar{
+            display: static;
+        }
+        :root {
+            --bg-dark: #070707;
+            --bg-panel: #111111;
+            --bg-lighter: #1a1a1a;
+            --text-light: #e0e0e0;
+            --text-muted: #999999;
+            --gold: #cfaa5e;
+            --gold-dim: #8a703c;
+            --red-accent: #7a0000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.8;
+            overflow-x: hidden;
+            perspective: 1500px;
+        }
+
+        h1, h2, h3, h4, h5 { font-family: 'Playfair Display', serif; color: var(--gold); }
+
+        /* ОГРОМЕН 3D СИМВОЛ "205" НА ЗАДЕН ФОН - ПО-КОНТРАСТЕН */
+        .bg-205 {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-family: 'Playfair Display', serif; font-size: 40vw; font-weight: 900;
+            color: rgba(207, 170, 94, 0.08); /* Оптимален контраст */
+            z-index: -1; pointer-events: none;
+            transform-style: preserve-3d; white-space: nowrap;
+            text-shadow: 0 0 30px rgba(207, 170, 94, 0.15);
+        }
+
+        /* Навигация - ВИНАГИ ВИДИМА */
+        nav {
+            position: absolute; top: 0; left: 0; width: 100%; padding: 20px 5vw; display: flex;
+            justify-content: space-between; align-items: center; 
+            background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(15px); 
+            border-bottom: 2px solid var(--red-accent); 
+            z-index: 99999; transition: all 0.4s ease; box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+        }
+        .logo { font-size: 1.5rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 900; color: var(--text-light); }
+        .nav-links { display: flex; gap: 25px; list-style: none; }
+        .nav-links a { 
+            color: var(--text-light); text-decoration: none; font-size: 0.8rem; 
+            text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s; 
+            position: relative; font-weight: 600;
+        }
+        .nav-links a::after {
+            content: ''; position: absolute; width: 0; height: 2px; bottom: -5px; left: 0;
+            background-color: var(--gold); transition: width 0.3s;
+        }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-links a:hover { color: var(--gold); }
+
+        /* Падащо меню */
+        .dropdown { position: relative; }
+        .dropdown-content {
+            position: absolute; top: 150%; left: 50%; transform: translateX(-50%) translateY(15px);
+            background: var(--bg-panel); border: 1px solid var(--gold); padding: 15px 25px;
+            opacity: 0; visibility: hidden; transition: all 0.3s ease; white-space: nowrap; color: var(--gold);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .dropdown:hover .dropdown-content { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+
+        /* Hero секция с Тъмен Портрет */
+        .hero {
+            height: 100vh; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; text-align: center; position: relative; padding: 0 20px;
+        }
+        .hero-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url(r1.webp); /* [СНИМКА_РАКОВСКИ_ФОН: Сложи тук името на файла за фон] */
+            background-size: cover; background-position: top center; z-index: -2;
+        }
+        .hero-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(7,7,7,1)); z-index: -1;
+        }
+        .hero h2 { font-size: 1.5rem; color: var(--red-accent); letter-spacing: 5px; text-transform: uppercase; margin-bottom: 20px; font-family: 'Montserrat', sans-serif; font-weight: 500;}
+        .hero h1 { font-size: 5.5rem; margin-bottom: 25px; text-shadow: 0 10px 30px rgba(0,0,0,0.9); line-height: 1.1; font-weight: 900;}
+        .hero p { font-size: 1.3rem; max-width: 800px; font-style: italic; color: #ddd; letter-spacing: 1px; text-shadow: 0 2px 10px #000;}
+
+        /* Общи стилове за секции */
+        section { padding: 120px 8vw; position: relative; z-index: 10;}
+        .section-title { font-size: 3.5rem; text-align: center; margin-bottom: 90px; position: relative; text-shadow: 0 5px 15px rgba(0,0,0,0.5);}
+        .section-title::after { content: ''; position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); width: 80px; height: 4px; background: var(--red-accent); }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: stretch; margin-bottom: 80px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-bottom: 60px;}
+
+        /* Текстови Карти (БЕЗ 3D мишка, само скрол) */
+        .text-card {
+            background: rgba(17, 17, 17, 0.9); padding: 40px; border-left: 4px solid var(--gold);
+            border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.7); height: 100%; 
+            display: flex; flex-direction: column; justify-content: center; backdrop-filter: blur(5px);
+        }
+        .text-card h3 { font-size: 1.8rem; margin-bottom: 20px; color: #fff; }
+        .text-card h4 { font-size: 1.3rem; margin-bottom: 15px; color: var(--gold); margin-top: 20px; }
+        .text-card p { margin-bottom: 15px; font-size: 1.05rem; color: var(--text-light); text-align: justify; }
+        blockquote { font-style: italic; color: var(--gold); border-left: 3px solid var(--red-accent); padding: 25px; margin: 40px 0; background: rgba(0,0,0,0.5); font-size: 1.2rem; }
+
+        /* Изображения с 3D Hover ефекти (tilt-js) */
+        .img-container {
+            width: 100%; height: 100%; min-height: 350px; background: var(--bg-lighter);
+            border: 2px solid var(--gold-dim); border-radius: 12px; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; position: relative;
+            transform-style: preserve-3d; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+        }
+        .img-container img {
+            width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;
+            filter: grayscale(60%) sepia(20%); transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform: scale(1.05);
+        }
+        .img-container:hover img { filter: grayscale(0%) sepia(0%); transform: scale(1.15); }
+        .img-caption {
+            position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+            padding: 40px 15px 20px 15px; color: var(--gold); font-size: 1.1rem; text-align: center; font-weight: 700;
+            transform: translateY(100%); transition: transform 0.4s ease; text-transform: uppercase;
+        }
+        .img-container:hover .img-caption { transform: translateY(0); }
+
+        /* Времева Линия (Планове) */
+        .timeline-container { position: relative; max-width: 1200px; margin: 0 auto; padding: 40px 0;}
+        .timeline-line { position: absolute; left: 50%; top: 0; width: 4px; height: 100%; background: rgba(207, 170, 94, 0.2); transform: translateX(-50%); }
+        .timeline-progress { position: absolute; left: 50%; top: 0; width: 4px; height: 0%; background: var(--red-accent); transform: translateX(-50%); box-shadow: 0 0 20px var(--red-accent);}
+        .timeline-event { display: flex; justify-content: space-between; align-items: center; margin-bottom: 120px; position: relative; width: 100%;}
+        .timeline-event:nth-child(even) { flex-direction: row-reverse; }
+        .timeline-content { width: 45%; }
+        .timeline-dot {
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            width: 26px; height: 26px; background: var(--bg-dark); border: 4px solid var(--gold);
+            border-radius: 50%; z-index: 2; transition: all 0.4s; box-shadow: 0 0 20px rgba(207, 170, 94, 0.6);
+        }
+        .timeline-event:hover .timeline-dot { background: var(--red-accent); border-color: #fff; transform: translate(-50%, -50%) scale(1.5); }
+        .timeline-date { font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--red-accent); margin-bottom: 15px; text-shadow: 0 5px 15px rgba(0,0,0,0.9); }
+
+        /* Галерия и Линкове */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .gallery-item { height: 350px; }
+        
+        .links-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 50px; }
+        .ext-link { background: rgba(20,20,20,0.8); border: 1px solid var(--gold-dim); padding: 20px; border-radius: 8px; text-align: center; color: var(--text-light); text-decoration: none; transition: 0.3s; }
+        .ext-link:hover { background: var(--gold); color: var(--bg-dark); transform: translateY(-5px); box-shadow: 0 10px 20px rgba(207,170,94,0.4); }
+
+        /* PDF и Бутони */
+        .pdf-section { background: linear-gradient(135deg, #111, #050505); border: 2px dashed var(--gold); padding: 60px; text-align: center; border-radius: 12px; margin-top: 50px;}
+        .pdf-btn { display: inline-block; padding: 15px 40px; font-size: 1.2rem; font-weight: bold; color: var(--bg-dark); background: var(--gold); text-decoration: none; text-transform: uppercase; border-radius: 5px; transition: 0.3s; margin-top: 20px; box-shadow: 0 0 15px rgba(207,170,94,0.5);}
+        .pdf-btn:hover { background: #fff; box-shadow: 0 0 30px var(--gold); }
+
+        .btn-container { text-align: center; margin: 80px 0 50px 0; position: relative; z-index: 20; }
+        .glow-btn {
+            position: relative; display: inline-block; padding: 20px 60px; font-size: 1.5rem;
+            font-weight: 700; color: var(--gold); background: rgba(0,0,0,0.5); border: 2px solid var(--gold);
+            text-transform: uppercase; text-decoration: none; overflow: hidden; transition: all 0.4s;
+            border-radius: 8px; font-family: 'Montserrat', sans-serif; letter-spacing: 2px;
+            box-shadow: 0 0 20px rgba(207, 170, 94, 0.2); backdrop-filter: blur(5px);
+        }
+        .glow-btn span { display: block; transition: transform 0.4s, opacity 0.4s; }
+        .glow-btn .hover-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, 100%); opacity: 0; color: #fff; width: 100%; transition: all 0.4s; font-size: 1.5rem; }
+        .glow-btn:hover { background: var(--gold); box-shadow: 0 0 40px var(--gold); border-color: #fff; }
+        .glow-btn:hover span { transform: translateY(-100%); opacity: 0; }
+        .glow-btn:hover .hover-text { opacity: 1; transform: translate(-50%, -50%); }
+
+        @media (max-width: 1000px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 3.5rem; }
+            .timeline-line, .timeline-progress { left: 30px; }
+            .timeline-event, .timeline-event:nth-child(even) { flex-direction: column; align-items: flex-end; }
+            .timeline-content { width: calc(100% - 70px); }
+            .timeline-dot { left: 30px; }
+            .bg-205 { font-size: 60vw; }
+            .glow-btn { padding: 15px 40px; font-size: 1.2rem; }
+            nav { padding: 15px 5vw; flex-wrap: wrap; }
+            .nav-links { gap: 15px; margin-top: 10px;}
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-205" id="bg-205">205</div>
+
+    <nav id="navbar">
+        <div class="logo">Г.С. Раковски</div>
+        <ul class="nav-links">
+            <li><a href="#home">Начало</a></li>
+            <li><a href="#bio">Биография</a></li>
+            <li><a href="#politics">Дейност</a></li>
+            <li><a href="#timeline">Легии</a></li>
+            <li><a href="#gallery">Галерия</a></li>
+            <li><a href="#death">Пантеон</a></li>
+            <li><a href="#documents">Архиви</a></li>
+            <li><a href="#documents">За Нас</a></li>
+            <li class="dropdown">
+                <a href="#projects" style="color: var(--red-accent);">Проекти ▾</a>
+                <div class="dropdown-content">Очаквайте скоро!</div>
+            </li>
+        </ul>
+    </nav>
+
+    <header class="hero" id="home">
+        <div class="hero-bg"></div>
+        <div class="hero-overlay"></div>
+        <h2 class="gsap-hero">205 години от рождението</h2>
+        <h1 class="gsap-hero">Кодът на свободата:<br>Георги Раковски</h1>
+        <p class="gsap-hero">Идеолог на организираното българско революционно движение.</p>
+    </header>
+
+    <section id="bio">
+        <h2 class="section-title gsap-3d-title">Начало на движението</h2>
+        
+        <div class="grid-2">
+            <div class="text-card gsap-3d-left">
+                <h3>1. Биографични данни</h3>
+                <p>Търсенето на нови пътища и форми на борба, формулирането на ясна и конкретна революционна идеология и първите стъпки за нейното прилагане в практиката се свързват с дейността на <strong>Георги Стойков Раковски (Съби Стойков Попович)</strong>.</p>
+                <h4>Родно място и семейство</h4>
+                <p>Роден през 1821 г. в Котел, Раковски произхожда от богато търговско-джелепско семейство. Огромно значение за избора на бъдещия му житейски път има семейната среда, особено вуйчо му <strong>кап. Георги Мамарчев</strong>.</p>
+            </div>
+            
+            <div class="img-container tilt-js gsap-3d-right">
+                <img src="r2.png" alt="Георги Раковски">
+                <div class="img-caption">Георги Стойков Раковски</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="img-container tilt-js gsap-3d-left">
+                <img src="r3.jpg" alt="Град Котел">
+                <div class="img-caption">Родният Котел - Люлка на Възраждането</div>
+            </div>
+            
+            <div class="text-card gsap-3d-right">
+                <h4>Образование</h4>
+                <p>През 1828 г. Раковски постъпва в котленското училище. След завършването му той продължава обучението си в Карлово при Райно Попович.</p>
+                <p>През 1837 г. заминава за Цариград и постъпва в прочутата гръцка гимназия в квартала Коручешме. В това училище учат редица други българчета. Именно там той заменя името си от Съби Попович на Сава Стефанидис, но в никакъв случай не губи будното си национално самосъзнание.</p>
+                <p>Годините, прекарани в гръцката гимназия, се отразяват плодотворно. Особено силно въздействие за формирането на неговите възгледи оказват идеите на <strong>Неофит Бозвели</strong>.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="politics" style="background: rgba(10,10,10,0.5);">
+        <h2 class="section-title gsap-3d-title">2. Политическа дейност</h2>
+        <div style="text-align: center; margin-bottom: 60px;">
+            <h3 style="color: var(--text-muted); font-size: 1.5rem;" class="gsap-3d-up">Първи етап (1841 — 1856 г.)</h3>
+        </div>
+
+        <div class="grid-2">
+            <div class="text-card gsap-3d-left">
+                <h4>Атина и Втори браилски бунт</h4>
+                <p>В края на 30-те години се свързва с български младежи в Атина и става съорганизатор на "Македонско дружество". През лятото на 1841 г., под името Георги Македон, заминава за Влашко. Заема се с организирането на Втория браилски бунт. Плановете му предвиждат два добре въоръжени отряда да предизвикат въстание. През февруари 1842 г. полицията разкрива заговора. Раковски е осъден на смърт, но бяга във Франция.</p>
+                
+                <h4>Затвор в Цариград</h4>
+                <p>След завръщането си в Котел е наклеветен и попада в цариградския затвор за три години и половина. Оказал се на свобода, натрупва значително състояние от търговска дейност.</p>
+            </div>
+            
+            <div class="img-container tilt-js gsap-3d-right">
+                <img src="r4.jpg" alt="Цариград / Белград">
+                <div class="img-caption">Цариград през 19 век</div>
+            </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 60px;">
+            <div class="img-container tilt-js gsap-3d-left" style="min-height: 450px;">
+                <img src="r5.jpg" alt="Дунавски лебед">
+                <div class="img-caption">В-к "Дунавски лебед"</div>
+            </div>
+            <div class="img-container tilt-js gsap-3d-right" style="min-height: 450px;">
+                <img src="r6.jpg" alt="Позив към народа">
+                <div class="img-caption">Позив към Българския народ за въстание, 1862г.</div>
+            </div>
+        </div>
+
+        <div class="grid-2" style="margin-top: 60px;">
+            <div class="text-card gsap-3d-left">
+                <h4>"Тайно общество" (1853 г.)</h4>
+                <p>В навечерието на Кримската война Раковски създава в Цариград нова политическа организация, наречена <strong>"Тайно общество"</strong>, за да подготви народа за въстание при руско настъпление. Клонове са създадени в Шумен, Търново, Русе, Свищов, Видин, Враца. Това представлява първия сериозен опит за изграждане на нелегална структура във вътрешността на земите ни.</p>
+            </div>
+            <div class="text-card gsap-3d-right">
+                <h4>Шпионаж и равносметка</h4>
+                <p>По това време Раковски е преводач в турската армия и извършва разузнавателна дейност за Русия. Разкрит е, но бяга. През 1854 г. се установява с чета в Котел. През този период той все още търси баланс между мирните и революционни методи, но вече определя бъдещето си на радетел за свобода.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="timeline">
+        <h2 class="section-title gsap-3d-title">Втори етап (1857 - 1867) и Легиите</h2>
+        
+        <div class="timeline-container">
+            <div class="timeline-line"></div>
+            <div class="timeline-progress" id="timeline-progress"></div>
+
+            <div class="timeline-event">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content text-card gsap-3d-timeline-left">
+                    <div class="timeline-date">1855 - 1858</div>
+                    <h3>Нови Сад и Одески план</h3>
+                    <p>През 1856 г. заминава за Нови Сад. Започва да издава <strong>"Българска дневница"</strong> и завършва поемата <strong>"Горски пътник"</strong>, където излага идеите си за четническа тактика.</p>
+                    <p>През 1858 г. в Одеса се появява <strong>първият план</strong> за освобождение: "Мечом са българи своя свобода изгубили, мечом пак трябва да я добият!". Предвижда всеобщо българско въстание и Тайна канцелария.</p>
+                </div>
+            </div>
+
+            <div class="timeline-event">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content text-card gsap-3d-timeline-right">
+                    <div class="timeline-date">1860 - 1862</div>
+                    <h3>Втори план и Първа Легия</h3>
+                    <p>В Белград изработва <strong>Белградския план</strong> (масово народно въстание, подкрепено от отряд от Сърбия). Учредено е Привременно българско началство.</p>
+                    <p>Сформират <strong>Първа българска легия</strong> (600 доброволци - Левски, Ст. Караджа). Легията участва в боевете за Белградската крепост, но по-късно е разпусната.</p>
+                    <div class="img-container tilt-js" style="min-height: 250px; margin-top: 20px;">
+                        <img src="r7.jpg" alt="Първа Легия">
+                        <div class="img-caption">Първа Българска Легия</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-event">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content text-card gsap-3d-timeline-left">
+                    <div class="timeline-date">1863 - 1867</div>
+                    <h3>Трети план и Втора Легия</h3>
+                    <p>Разбрал намеренията на съседите, той стига до извода, че българите трябва да разчитат само на собствените си сили. Съставя <strong>"Привременен закон за народните горски чети на 1867-о лето"</strong> - върхът в идейното му развитие.</p>
+                    <p>Предвижда създаване на Върховно народно българско тайно гражданско началство. Идеите му по-късно служат за основа и при събирането на <strong>Втората българска легия</strong>.</p>
+                    <div class="img-container tilt-js" style="min-height: 250px; margin-top: 20px;">
+                        <img src="r8.jpg" alt="Втора Легия">
+                        <div class="img-caption">Български легионери</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="gallery">
+        <h2 class="section-title gsap-3d-title">Галерия & 3D</h2>
+        <div class="gallery-grid">
+            <div class="img-container tilt-js gallery-item gsap-3d-up">
+                <img src="СНИМКА_ОРЪЖИЕ_1.jpg" alt="3Д модел 1">
+                <div class="img-caption">Личното оръжие на войводата</div>
+            </div>
+            <div class="img-container tilt-js gallery-item gsap-3d-up">
+                <img src="r10.jpg" alt="Оръжия">
+                <div class="img-caption">Сабя и револвер</div>
+            </div>
+            <div class="img-container tilt-js gallery-item gsap-3d-up">
+                <img src="СНИМКА_ИСТОРИЯ_БГ.jpg" alt="3Д модел 2">
+                <div class="img-caption">История на България т.6</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="death" style="background: rgba(10,10,10,0.6);">
+        <h2 class="section-title gsap-3d-title">Безсмъртието на героя</h2>
+        
+        <div class="grid-2">
+            <div class="text-card gsap-3d-left" style="border-color: var(--red-accent);">
+                <h3>Краят на един земен път</h3>
+                <p>На 9 октомври 1867 г., изтощен от неимоверния труд, скиталчествата и лишенията, Георги Стойков Раковски умира от туберкулоза в Букурещ. Той си отива от този свят само на 46 години, не дочаквайки да види родината си свободна, но оставяйки след себе си напълно изградена идеология за българската революция.</p>
+                <p>Първоначално великият българин е погребан в румънската столица. През 1885 г. неговите съратници и признателният български народ пренасят тленните му останки в освободена София.</p>
+                <p>Десетилетия по-късно, през 1942 г., Раковски най-после се завръща завинаги в родния си град Котел. Днес костите му почиват в монументалния <strong>Пантеон на Георги Стойков Раковски</strong> – свещено място, което гордо напомня на поколенията за саможертвата на патриарха на българската национална революция.</p>
+            </div>
+
+            <div class="img-container tilt-js gsap-3d-right" style="border: 3px solid var(--red-accent);">
+                <img src="r12.jpg" alt="Пантеон Котел">
+                <div class="img-caption" style="font-size: 1.2rem;">Пантеонът на Раковски в Котел</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="legacy">
+        <h2 class="section-title gsap-3d-title">Значение на дейността</h2>
+        
+        <div class="grid-3">
+            <div class="text-card gsap-3d-up">
+                <h4>Начало на борбата</h4>
+                <p>Заслугите на Г. Раковски за възраждането на българите са изключителни. Неговата дейност отбелязва началото на организираното националноосвободително движение. Той пръв достига до прозрението за всенародно въстание.</p>
+            </div>
+            <div class="text-card gsap-3d-up">
+                <h4>Самостоятелност</h4>
+                <p>Опитът го довежда до постановката - българското освобождение трябва да бъде дело на българския народ. Въпреки че разчита на четите, той подчинява действията им на масово въстание, направлявано от централно ръководство.</p>
+            </div>
+            <div class="text-card gsap-3d-up">
+                <h4>Политик и Просветител</h4>
+                <p>Осъзнава връзката на българския въпрос с Източния въпрос. Подготвя ново поколение дейци. Като надарен публицист, съдейства за просвета, църква и историография. Той е един от най-големите дейци на възрожденското общество.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="documents" style="padding-top: 50px;">
+        <h2 class="section-title gsap-3d-title">Източници и Нови Архиви</h2>
+        
+        <div class="links-grid gsap-fade-up">
+            <a href="https://www.unibit.bg/opismeneh-digital/documents-about-georgi-rakovski-in-the-ottoman-archives" target="_blank" class="ext-link">Османски Архиви (УниБИТ)</a>
+            <a href="https://bulgarianhistory.org/publicista-rakovski/" target="_blank" class="ext-link">Публицистът Раковски</a>
+            <a href="https://bg-istoria.animatherapy.com/%D0%B3%D0%B5%D0%BE%D1%80%D0%B3%D0%B8-%D1%80%D0%B0%D0%BA%D0%BE%D0%B2%D1%81%D0%BA%D0%B8/" target="_blank" class="ext-link">БГ История: Г.С. Раковски</a>
+            <a href="https://storymaps.arcgis.com/stories/a57bb3c6e64e491ab6318946c959ad93" target="_blank" class="ext-link">StoryMaps (Интерактивна карта)</a>
+        </div>
+
+        <div class="pdf-section gsap-fade-up">
+            <h3 style="font-size: 2rem; margin-bottom: 20px; color: var(--gold);">Нови архиви</h3>
+            <p style="font-size: 1.2rem; color: #ccc; margin-bottom: 30px;">Разгледайте новооткритите османски документи, преводи и анализи, свързани с живота, рождената дата и стопанската дейност на Г. С. Раковски.</p>
+            
+            <a href="османски-документи-Раковски(1).pdf" target="_blank" class="pdf-btn">Отвори PDF Документа</a>
+        </div>
+    </section>
+
+    <div class="btn-container" id="projects">
+        <a href="#projects" class="glow-btn">
+            <span>Още проекти</span>
+            <div class="hover-text">Очаквайте скоро!</div>
+        </a>
+    </div>
+
+    <footer style="text-align: center; padding: 60px 20px 40px 20px; background: #040404; border-top: 2px solid var(--red-accent); position: relative; z-index: 10;">
+        <h2 style="color: var(--gold); margin-bottom: 15px; letter-spacing: 2px;">Проект „Кодът на свободата: Георги Раковски“</h2>
+        <p style="color: var(--text-muted); font-size: 1.1rem;">Изработено за Втора национална историческа конференция</p>
+    </footer>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 1. Анимации при зареждане
+        gsap.from(".gsap-hero", { y: 100, scale: 0.9, opacity: 0, duration: 1.5, stagger: 0.2, ease: "power4.out" });
+
+        // 2. Интерактивен 3D ефект за ОГРОМНОТО число "205"
+        const bgText = document.getElementById('bg-205');
+        window.addEventListener('mousemove', (e) => {
+            const x = (window.innerWidth / 2 - e.pageX) / 40;
+            const y = (window.innerHeight / 2 - e.pageY) / 40;
+            gsap.to(bgText, { rotationY: x, rotationX: y, ease: "power2.out", duration: 1.5 });
+        });
+
+        // 3. Паралакс при скролиране
+        gsap.to(bgText, {
+            yPercent: -40, rotationX: 10, ease: "none",
+            scrollTrigger: { trigger: "body", start: "top top", end: "bottom bottom", scrub: 1 }
+        });
+
+        // Fade Up (За по-обикновени елементи)
+        gsap.utils.toArray('.gsap-fade-up').forEach(elem => {
+            gsap.from(elem, {
+                scrollTrigger: { trigger: elem, start: "top 85%" },
+                y: 50, opacity: 0, duration: 1, ease: "power2.out"
+            });
+        });
+
+        // 4. Екстремни 3D ScrollTrigger Анимации
+        gsap.utils.toArray('.gsap-3d-title').forEach(elem => {
+            gsap.from(elem, {
+                scrollTrigger: { trigger: elem, start: "top 85%" },
+                y: 80, rotationX: 30, opacity: 0, duration: 1.5, ease: "back.out(1.5)"
+            });
+        });
+
+        gsap.utils.toArray('.gsap-3d-left').forEach(elem => {
+            gsap.from(elem, {
+                scrollTrigger: { trigger: elem, start: "top 85%" },
+                x: -200, rotationY: -25, rotationX: 10, opacity: 0, duration: 1.5, ease: "back.out(1.2)"
+            });
+        });
+
+        gsap.utils.toArray('.gsap-3d-right').forEach(elem => {
+            gsap.from(elem, {
+                scrollTrigger: { trigger: elem, start: "top 85%" },
+                x: 200, rotationY: 25, rotationX: 10, opacity: 0, duration: 1.5, ease: "back.out(1.2)"
+            });
+        });
+
+        gsap.utils.toArray('.gsap-3d-up').forEach((elem, i) => {
+            gsap.from(elem, {
+                scrollTrigger: { trigger: elem, start: "top 85%" },
+                y: 150, rotationX: 20, scale: 0.9, opacity: 0, duration: 1.2, ease: "power3.out"
+            });
+        });
+
+        // Специални анимации за Времевата линия
+        gsap.utils.toArray('.gsap-3d-timeline-left').forEach(elem => {
+            gsap.from(elem, { scrollTrigger: { trigger: elem, start: "top 85%" }, x: -150, scale: 0.8, opacity: 0, duration: 1.2, ease: "power3.out" });
+        });
+        gsap.utils.toArray('.gsap-3d-timeline-right').forEach(elem => {
+            gsap.from(elem, { scrollTrigger: { trigger: elem, start: "top 85%" }, x: 150, scale: 0.8, opacity: 0, duration: 1.2, ease: "power3.out" });
+        });
+
+        // 5. Пълнене на Времевата линия
+        gsap.to("#timeline-progress", {
+            height: "100%", ease: "none",
+            scrollTrigger: { trigger: ".timeline-container", start: "top center", end: "bottom center", scrub: 1 }
+        });
+
+        // 6. ДИНАМИЧЕН 3D TILT ЕФЕКТ (САМО за СНИМКИ, премахнат от текста)
+        const tiltElements = document.querySelectorAll('.tilt-js');
+        tiltElements.forEach(el => {
+            el.addEventListener('mousemove', function(e) {
+                const rect = el.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -15; 
+                const rotateY = ((x - centerX) / centerX) * 15;
+                
+                el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
+            });
+            
+            el.addEventListener('mouseleave', function() {
+                el.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)`;
+                el.style.transition = `transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+            });
+            
+            el.addEventListener('mouseenter', function() {
+                el.style.transition = `none`;
+            });
+        });
+
+        
+    </script>
+</body>
+</html>
