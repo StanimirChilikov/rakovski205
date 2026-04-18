@@ -11,6 +11,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
     <style>
+        html {
+            scroll-behavior: smooth;
+        }
         .navbar{
             display: flex;
         }
@@ -218,7 +221,7 @@
             <li><a href="#gallery">Галерия</a></li>
             <li><a href="#death">Пантеон</a></li>
             <li><a href="#documents">Архиви</a></li>
-            <li><a href="#">За Нас</a></li>
+            <li><a href="about.html">За Нас</a></li>
             <li class="dropdown">
                 <a href="#projects" style="color: var(--red-accent);">Проекти ▾</a>
                 <div class="dropdown-content">Очаквайте скоро!</div>
@@ -362,15 +365,15 @@
         <div class="gallery-grid">
             <div class="img-container tilt-js gallery-item gsap-3d-up">
                 <img src="3d1.jpg" alt="3Д модел 1">
-                <div class="img-caption">Собствен 3Д принтиран модел на паметника на Раковски в двора на Военна академия, гр.София</div>
+                <div class="img-caption">Личното оръжие на войводата</div>
             </div>
             <div class="img-container tilt-js gallery-item gsap-3d-up">
                 <img src="r10.jpg" alt="Оръжия">
-                <div class="img-caption">Лични оръжия на революционера</div>
+                <div class="img-caption">Сабя и револвер</div>
             </div>
             <div class="img-container tilt-js gallery-item gsap-3d-up">
                 <img src="3d2.png" alt="3Д модел 2">
-                <div class="img-caption">Личен 3Д модел - бюст на Раковски</div>
+                <div class="img-caption">История на България т.6</div>
             </div>
         </div>
     </section>
@@ -439,7 +442,7 @@
 
     <footer style="text-align: center; padding: 60px 20px 40px 20px; background: #040404; border-top: 2px solid var(--red-accent); position: relative; z-index: 10;">
         <h2 style="color: var(--gold); margin-bottom: 15px; letter-spacing: 2px;">Проект „Кодът на свободата: Георги Раковски“</h2>
-        <p style="color: var(--text-muted); font-size: 1.1rem;">Изработено за Втора национална историческа конференция 2026г.</p>
+        <p style="color: var(--text-muted); font-size: 1.1rem;">Изработено за Втора национална историческа конференция</p>
     </footer>
 
     <script>
@@ -448,13 +451,7 @@
         // 1. Анимации при зареждане
         gsap.from(".gsap-hero", { y: 100, scale: 0.9, opacity: 0, duration: 1.5, stagger: 0.2, ease: "power4.out" });
 
-        // 2. Интерактивен 3D ефект за ОГРОМНОТО число "205"
-        const bgText = document.getElementById('bg-205');
-        window.addEventListener('mousemove', (e) => {
-            const x = (window.innerWidth / 2 - e.pageX) / 40;
-            const y = (window.innerHeight / 2 - e.pageY) / 40;
-            gsap.to(bgText, { rotationY: x, rotationX: y, ease: "power2.out", duration: 1.5 });
-        });
+        
 
         // 3. Паралакс при скролиране
         gsap.to(bgText, {
@@ -516,7 +513,7 @@
         // 6. ДИНАМИЧЕН 3D TILT ЕФЕКТ (САМО за СНИМКИ, премахнат от текста)
         const tiltElements = document.querySelectorAll('.tilt-js');
         tiltElements.forEach(el => {
-            el.addEventListener('mousemove', function(e) {
+            el.addEventListener('', function(e) {
                 const rect = el.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
