@@ -453,12 +453,6 @@
 
         
 
-        // 3. Паралакс при скролиране
-        gsap.to(bgText, {
-            yPercent: -40, rotationX: 10, ease: "none",
-            scrollTrigger: { trigger: "body", start: "top top", end: "bottom bottom", scrub: 1 }
-        });
-
         // Fade Up (За по-обикновени елементи)
         gsap.utils.toArray('.gsap-fade-up').forEach(elem => {
             gsap.from(elem, {
@@ -513,7 +507,7 @@
         // 6. ДИНАМИЧЕН 3D TILT ЕФЕКТ (САМО за СНИМКИ, премахнат от текста)
         const tiltElements = document.querySelectorAll('.tilt-js');
         tiltElements.forEach(el => {
-            el.addEventListener('', function(e) {
+            el.addEventListener('mousemove', function(e) {
                 const rect = el.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
