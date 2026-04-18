@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>За екипа | Кодът на свободата</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+
+        :root {
+            --bg-dark: #070707;
+            --bg-panel: #111111;
+            --bg-lighter: #1a1a1a;
+            --text-light: #e0e0e0;
+            --text-muted: #999999;
+            --gold: #cfaa5e;
+            --gold-dim: #8a703c;
+            --red-accent: #7a0000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.8;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5 { font-family: 'Playfair Display', serif; color: var(--gold); }
+
+        /* Навигация */
+        nav {
+            position: absolute; top: 0; left: 0; width: 100%; padding: 20px 5vw; display: flex;
+            justify-content: space-between; align-items: center; 
+            background: transparent; backdrop-filter: blur(0px); 
+            border-bottom: 2px solid transparent; 
+            z-index: 99999; transition: all 0.4s ease;
+        }
+
+        nav.header-sticky {
+            position: fixed; top: 0; padding: 15px 5vw; background: rgba(5, 5, 5, 0.95); 
+            backdrop-filter: blur(15px); border-bottom: 2px solid var(--red-accent); 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+        }
+
+        .logo { font-size: 1.5rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 900; color: var(--text-light); }
+        .nav-links { display: flex; gap: 25px; list-style: none; }
+        .nav-links a { 
+            color: var(--text-light); text-decoration: none; font-size: 0.8rem; 
+            text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s; 
+            position: relative; font-weight: 600;
+        }
+        .nav-links a::after {
+            content: ''; position: absolute; width: 0; height: 2px; bottom: -5px; left: 0;
+            background-color: var(--gold); transition: width 0.3s;
+        }
+        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
+        .nav-links a:hover, .nav-links a.active { color: var(--gold); }
+
+        /* Падащо меню */
+        .dropdown { position: relative; }
+        .dropdown-content {
+            position: absolute; top: 150%; left: 50%; transform: translateX(-50%) translateY(15px);
+            background: var(--bg-panel); border: 1px solid var(--gold); padding: 15px 25px;
+            opacity: 0; visibility: hidden; transition: all 0.3s ease; white-space: nowrap; color: var(--gold);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .dropdown:hover .dropdown-content { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+
+        /* Hero Секция за "За нас" */
+        .hero-short {
+            height: 60vh; display: flex; flex-direction: column; justify-content: center;
+            align-items: center; text-align: center; position: relative; padding: 0 20px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(7,7,7,1)), url('r1.webp') center/cover;
+            border-bottom: 2px solid var(--gold-dim);
+        }
+        .hero-short h1 { font-size: 4.5rem; margin-bottom: 15px; text-shadow: 0 10px 30px rgba(0,0,0,0.9); }
+        .hero-short p { font-size: 1.2rem; max-width: 600px; font-style: italic; color: var(--text-muted); }
+
+        /* Дизайн на картите за екипа */
+        section { padding: 80px 5vw; }
+        
+        /* КОРИГИРАНО РАЗСТОЯНИЕ МЕЖДУ ДВЕТЕ СЕКЦИИ */
+        .students-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; max-width: 1200px; margin: 0 auto 80px auto; }
+        .mentor-section { display: flex; justify-content: center; }
+
+        .team-card {
+            background: var(--bg-panel); border: 1px solid var(--gold-dim); border-radius: 12px;
+            padding: 20px; text-align: center; transition: all 0.6s ease; /* Удължена анимация на 0.6s */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; overflow: hidden;
+            transform-style: preserve-3d;
+            height: 100%; display: flex; flex-direction: column;
+        }
+
+        .team-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+            background: var(--red-accent); transition: height 0.5s ease; /* Удължена анимация на 0.6s */
+            z-index: 0;
+        }
+        .team-card:hover::before { height: 100%; opacity: 0.05; }
+        .team-card:hover { border-color: var(--gold); box-shadow: 0 15px 40px rgba(207, 170, 94, 0.2); }
+
+        /* Рамка за снимките */
+        .img-wrapper {
+            width: 100%; height: 350px; overflow: hidden; border-radius: 8px; margin-bottom: 20px;
+            border: 2px solid #222; position: relative; z-index: 1; transform: translateZ(30px);
+        }
+        
+        .img-wrapper img {
+            width: 100%; height: 100%; 
+            object-fit: cover; 
+            object-position: center top; 
+            filter: grayscale(40%) contrast(1.1); transition: filter 0.5s ease;
+        }
+        
+        .team-card:hover .img-wrapper img { filter: grayscale(0%) contrast(1.1); }
+
+        .team-info { position: relative; z-index: 1; transform: translateZ(20px); flex-grow: 1; display: flex; flex-direction: column;}
+        .team-info h3 { font-size: 1.6rem; margin-bottom: 5px; color: var(--gold); }
+        .team-info h4 { font-size: 1rem; color: var(--red-accent); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; font-family: 'Montserrat', sans-serif;}
+        .team-info p { font-size: 0.95rem; color: var(--text-light); text-align: justify; flex-grow: 1;}
+
+        /* Мобилна версия */
+        @media (max-width: 900px) {
+            .students-section { grid-template-columns: 1fr; max-width: 400px; margin-bottom: 60px; }
+            nav { padding: 15px 5vw; flex-wrap: wrap; }
+            .nav-links { gap: 10px; margin-top: 10px; justify-content: center; width: 100%;}
+            .hero-short h1 { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav id="navbar">
+        <div class="logo">Г.С. Раковски</div>
+        <ul class="nav-links">
+            <li><a href="index.html#home">Начало</a></li>
+            <li><a href="index.html#bio">Биография</a></li>
+            <li><a href="index.html#politics">Дейност</a></li>
+            <li><a href="index.html#timeline">Легии</a></li>
+            <li><a href="index.html#gallery">Галерия</a></li>
+            <li><a href="index.html#death">Пантеон</a></li>
+            <li><a href="index.html#documents">Архиви</a></li>
+            <li><a href="about.html" class="active" style="color: var(--red-accent);">За Нас</a></li>
+            <li class="dropdown">
+                <a href="#projects" style="color: var(--red-accent);">Проекти ▾</a>
+                <div class="dropdown-content">Очаквайте скоро!</div>
+            </li>
+        </ul>
+    </nav>
+
+    <header class="hero-short">
+        <h1 class="gsap-hero">Лицата зад проекта</h1>
+        <p class="gsap-hero">Отборът, който изследва, програмира и създаде "Кодът на свободата", посветен на живота и делото на Георги Стойков Раковски.</p>
+    </header>
+
+    <section>
+        <div class="students-section">
+            
+            <div class="team-card tilt-js gsap-stagger">
+                <div class="img-wrapper">
+                    <img src="chilikov_photo.jpg" alt="Станимир Чиликов" onerror="this.src='https://via.placeholder.com/400x500/111/cfaa5e?text=Снимка+Станимир'">
+                </div>
+                <div class="team-info">
+                    <h3>Станимир Чиликов</h3>
+                    <h4>Уеб Разработчик</h4>
+                    <p>Разработи уеб сайта, в който е събрана най-актуалната информация за Г. Раковски. Чрез ясно структурирана информация и внимателно подбрано съдържание, той представя живота и идеите на революционера, включвайки препратки към най-новите документи. Сайтът е изграден с възможност за бъдещо развитие и добавяне на нови проекти.</p>
+                </div>
+            </div>
+
+            <div class="team-card tilt-js gsap-stagger">
+                <div class="img-wrapper">
+                    <img src="kris_photo.jpg" alt="Кристиян Андреев" onerror="this.src='https://via.placeholder.com/400x500/111/cfaa5e?text=Снимка+Кристиян'">
+                </div>
+                <div class="team-info">
+                    <h3>Кристиян Андреев</h3>
+                    <h4>3D Моделиране и Интеракции</h4>
+                    <p>Създаде двата 3D модела, които добавят визуална дълбочина и потапят зрителя в епохата. Първият модел е базиран на паметника във Военната академия, а вторият – на исторически изображения. Кристиян разработи и кода, чрез който 3D моделът "проговаря" с известни думи на българския революционер.</p>
+                </div>
+            </div>
+
+            <div class="team-card tilt-js gsap-stagger">
+                <div class="img-wrapper">
+                    <img src="georgi_photo.jpg" alt="Георги Чоролеев" onerror="this.src='https://via.placeholder.com/400x500/111/cfaa5e?text=Снимка+Георги'">
+                </div>
+                <div class="team-info">
+                    <h3>Георги Чоролеев</h3>
+                    <h4>Аудио и Координация</h4>
+                    <p>Подпомогна работата на съотборниците си, съдействайки за реализирането на основните елементи на проекта. Той записа гласовете, използвани в интерактивния 3D модел, което значително допринася за по-голямата автентичност и въздействие на презентацията.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mentor-section">
+            <div class="team-card tilt-js gsap-stagger" style="max-width: 400px; width: 100%;">
+                <div class="img-wrapper">
+                    <img src="antoaneta_photo.jpg" alt="г-жа Антоанета Георгиева" onerror="this.src='https://via.placeholder.com/400x500/111/cfaa5e?text=Снимка+Учител'">
+                </div>
+                <div class="team-info">
+                    <h3>г-жа Антоанета Георгиева</h3>
+                    <h4>Научен ръководител</h4>
+                    <p>Старши учител по история и цивилизации в СПГЕ „Джон Атанасов“. Като ментор на екипа, тя ни насочваше, мотивираше и подкрепяше през целия процес на разработка. Също така ни насочи към проучване и подбор на по-голямата част от информацията, използвана в сайта.</p>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <footer style="text-align: center; padding: 60px 20px 40px 20px; background: #040404; border-top: 2px solid var(--red-accent); position: relative; z-index: 10;">
+        <h2 style="color: var(--gold); margin-bottom: 15px; letter-spacing: 2px;">Проект „Кодът на свободата: Георги Раковски“</h2>
+        <p style="color: var(--text-muted); font-size: 1.1rem;">Изработено за Втора национална историческа конференция</p>
+    </footer>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Входна анимация за хедъра
+        gsap.from(".gsap-hero", { y: 50, opacity: 0, duration: 1.2, stagger: 0.2, ease: "power3.out" });
+
+        // Плавно появяване на картите отдолу нагоре
+        gsap.utils.toArray('.gsap-stagger').forEach((elem, i) => {
+            gsap.from(elem, {
+                scrollTrigger: { trigger: elem, start: "top 90%" },
+                y: 100, opacity: 0, duration: 1, delay: i * 0.15, ease: "back.out(1.2)"
+            });
+        });
+
+        // ДИНАМИЧЕН 3D TILT ЕФЕКТ ЗА КАРТИТЕ
+        const tiltElements = document.querySelectorAll('.tilt-js');
+        tiltElements.forEach(el => {
+            el.addEventListener('mousemove', function(e) {
+                const rect = el.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = ((y - centerY) / centerY) * -10; 
+                const rotateY = ((x - centerX) / centerX) * 10;
+                
+                el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+            });
+            
+            el.addEventListener('mouseleave', function() {
+                el.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)`;
+                el.style.transition = `transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+            });
+            
+            el.addEventListener('mouseenter', function() {
+                el.style.transition = `none`;
+            });
+        });
+
+        // Скрол Навигация (Sticky Nav)
+        function stickyNav() {
+            var headerHeight = document.querySelector(".hero-short").offsetHeight - 100;
+            var navbar = document.querySelector("#navbar");
+            var scrollValue = window.scrollY;
+
+            if (scrollValue > headerHeight) {
+                navbar.classList.add("header-sticky");
+            } else {
+                navbar.classList.remove("header-sticky");
+            }
+        }
+
+        window.addEventListener("scroll", stickyNav);
+    </script>
+</body>
+</html>
