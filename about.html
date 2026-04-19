@@ -36,7 +36,6 @@
 
         h1, h2, h3, h4, h5 { font-family: 'Playfair Display', serif; color: var(--gold); }
 
-        /* Навигация */
         nav {
             position: absolute; top: 0; left: 0; width: 100%; padding: 20px 5vw; display: flex;
             justify-content: space-between; align-items: center; 
@@ -51,7 +50,17 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.8);
         }
 
-        .logo { font-size: 1.5rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 900; color: var(--text-light); }
+        .logo { font-size: 1.5rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 900; color: var(--text-light); z-index: 100000; } 
+        
+        .menu-toggle {
+            display: none;
+            color: var(--gold);
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 100000;
+            transition: all 0.3s ease;
+        }
+
         .nav-links { display: flex; gap: 25px; list-style: none; }
         .nav-links a { 
             color: var(--text-light); text-decoration: none; font-size: 0.8rem; 
@@ -65,7 +74,6 @@
         .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
         .nav-links a:hover, .nav-links a.active { color: var(--gold); }
 
-        /* Падащо меню */
         .dropdown { position: relative; }
         .dropdown-content {
             position: absolute; top: 150%; left: 50%; transform: translateX(-50%) translateY(15px);
@@ -75,7 +83,6 @@
         }
         .dropdown:hover .dropdown-content { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
 
-        /* Hero Секция за "За нас" */
         .hero-short {
             height: 60vh; display: flex; flex-direction: column; justify-content: center;
             align-items: center; text-align: center; position: relative; padding: 0 20px;
@@ -85,16 +92,14 @@
         .hero-short h1 { font-size: 4.5rem; margin-bottom: 15px; text-shadow: 0 10px 30px rgba(0,0,0,0.9); }
         .hero-short p { font-size: 1.2rem; max-width: 600px; font-style: italic; color: var(--text-muted); }
 
-        /* Дизайн на картите за екипа */
         section { padding: 80px 5vw; }
         
-        /* КОРИГИРАНО РАЗСТОЯНИЕ МЕЖДУ ДВЕТЕ СЕКЦИИ */
         .students-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; max-width: 1200px; margin: 0 auto 80px auto; }
         .mentor-section { display: flex; justify-content: center; }
 
         .team-card {
             background: var(--bg-panel); border: 1px solid var(--gold-dim); border-radius: 12px;
-            padding: 20px; text-align: center; transition: all 0.6s ease; /* Удължена анимация на 0.6s */
+            padding: 20px; text-align: center; transition: all 0.6s ease; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; overflow: hidden;
             transform-style: preserve-3d;
             height: 100%; display: flex; flex-direction: column;
@@ -102,13 +107,12 @@
 
         .team-card::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
-            background: var(--red-accent); transition: height 0.5s ease; /* Удължена анимация на 0.6s */
+            background: var(--red-accent); transition: height 0.5s ease; 
             z-index: 0;
         }
         .team-card:hover::before { height: 100%; opacity: 0.05; }
         .team-card:hover { border-color: var(--gold); box-shadow: 0 15px 40px rgba(207, 170, 94, 0.2); }
 
-        /* Рамка за снимките */
         .img-wrapper {
             width: 100%; height: 350px; overflow: hidden; border-radius: 8px; margin-bottom: 20px;
             border: 2px solid #222; position: relative; z-index: 1; transform: translateZ(30px);
@@ -128,12 +132,76 @@
         .team-info h4 { font-size: 1rem; color: var(--red-accent); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; font-family: 'Montserrat', sans-serif;}
         .team-info p { font-size: 0.95rem; color: var(--text-light); text-align: justify; flex-grow: 1;}
 
-        /* Мобилна версия */
+        /* --- МОБИЛНА ВЕРСИЯ (ОПТИМИЗАЦИЯ) --- */
         @media (max-width: 900px) {
-            .students-section { grid-template-columns: 1fr; max-width: 400px; margin-bottom: 60px; }
-            nav { padding: 15px 5vw; flex-wrap: wrap; }
-            .nav-links { gap: 10px; margin-top: 10px; justify-content: center; width: 100%;}
-            .hero-short h1 { font-size: 3rem; }
+            .menu-toggle {
+                display: block; 
+            }
+            /* Hides the logo at the top ONLY on mobile */
+            .logo { 
+                opacity: 0; 
+                visibility: hidden;
+                transition: all 0.4s ease; 
+    }
+             /* Shows the logo when scrolling down ONLY on mobile */
+             nav.header-sticky .logo {
+                 opacity: 1;
+                visibility: visible;
+    }
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%; 
+                height: 100vh;
+                width: 250px; 
+                background: rgba(10, 10, 10, 0.98);
+                backdrop-filter: blur(15px);
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 30px;
+                transition: right 0.4s ease;
+                border-left: 2px solid var(--red-accent);
+                z-index: 99998; 
+            }
+
+            .nav-links.nav-active {
+                right: 0; 
+                box-shadow: -10px 0 30px rgba(0,0,0,0.8);
+            }
+            .nav-links a {
+                font-size: 1.1rem; 
+            }
+            .dropdown-content {
+                position: static;
+                transform: none;
+                background: transparent;
+                border: none;
+                box-shadow: none;
+                padding: 10px 0 0 0;
+                text-align: center;
+                display: none; 
+            }
+            .dropdown:hover .dropdown-content {
+                display: block;
+                opacity: 1;
+                visibility: visible;
+                transform: none;
+            }
+
+            .hero-short {
+                height: 50vh;
+            }
+            .hero-short h1 { font-size: 2.8rem; }
+            .hero-short p { font-size: 1rem; padding: 0 10px; }
+
+            .students-section { 
+                grid-template-columns: 1fr; 
+                max-width: 500px; 
+                margin-bottom: 50px; 
+            }
+            section { padding: 50px 5vw; }
+            .img-wrapper { height: 300px; } 
         }
     </style>
 </head>
@@ -141,7 +209,10 @@
 
     <nav id="navbar">
         <div class="logo">Г.С. Раковски</div>
-        <ul class="nav-links">
+        <div class="menu-toggle" id="mobile-menu">
+            &#9776;
+        </div>
+        <ul class="nav-links" id="nav-links">
             <li><a href="index.html#home">Начало</a></li>
             <li><a href="index.html#bio">Биография</a></li>
             <li><a href="index.html#politics">Дейност</a></li>
@@ -223,10 +294,8 @@
     <script>
         gsap.registerPlugin(ScrollTrigger);
 
-        // Входна анимация за хедъра
         gsap.from(".gsap-hero", { y: 50, opacity: 0, duration: 1.2, stagger: 0.2, ease: "power3.out" });
 
-        // Плавно появяване на картите отдолу нагоре
         gsap.utils.toArray('.gsap-stagger').forEach((elem, i) => {
             gsap.from(elem, {
                 scrollTrigger: { trigger: elem, start: "top 90%" },
@@ -238,6 +307,9 @@
         const tiltElements = document.querySelectorAll('.tilt-js');
         tiltElements.forEach(el => {
             el.addEventListener('mousemove', function(e) {
+                // Изключваме tilt ефекта за мобилни устройства, за да не пречи на скролирането
+                if (window.innerWidth <= 900) return; 
+
                 const rect = el.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
@@ -252,11 +324,13 @@
             });
             
             el.addEventListener('mouseleave', function() {
+                if (window.innerWidth <= 900) return;
                 el.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)`;
                 el.style.transition = `transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
             });
             
             el.addEventListener('mouseenter', function() {
+                if (window.innerWidth <= 900) return;
                 el.style.transition = `none`;
             });
         });
@@ -273,8 +347,30 @@
                 navbar.classList.remove("header-sticky");
             }
         }
-
         window.addEventListener("scroll", stickyNav);
+
+        // --- ЛОГИКА ЗА МОБИЛНОТО МЕНЮ ---
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navLinks = document.getElementById('nav-links');
+        const menuItems = document.querySelectorAll('.nav-links a');
+
+        mobileMenu.addEventListener('click', () => {
+            navLinks.classList.toggle('nav-active');
+            
+            if (navLinks.classList.contains('nav-active')) {
+                mobileMenu.innerHTML = '&#10005;'; // X
+            } else {
+                mobileMenu.innerHTML = '&#9776;'; // Hamburg
+            }
+        });
+
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navLinks.classList.remove('nav-active');
+                mobileMenu.innerHTML = '&#9776;';
+            });
+        });
+
     </script>
 </body>
 </html>
