@@ -209,7 +209,15 @@
             .timeline-event, .timeline-event:nth-child(even) { flex-direction: column; align-items: flex-end; }
             .timeline-content { width: calc(100% - 70px); }
             .timeline-dot { left: 30px; }
-            .bg-205 { font-size: 60vw; }
+            /* .bg-205 { font-size: 60vw; } */
+
+            .bg-205 { 
+                font-size: 60vw; 
+                width: 100vw; /* Заема точно 100% от ширината на екрана */
+                left: 0; /* Залепва го за левия ръб */
+                transform: translateY(-50%); /* Държи го центриран само по височина */
+                text-align: center; /* Центрира самия текст перфектно в средата */
+            }
             .glow-btn { padding: 15px 40px; font-size: 1.2rem; }
             section { padding: 80px 5vw; } /* Намален padding за мобилни */
 
