@@ -14,9 +14,6 @@
         html {
             scroll-behavior: smooth;
         }
-        .navbar{
-            display: flex;
-        }
         :root {
             --bg-dark: #070707;
             --bg-panel: #111111;
@@ -36,22 +33,21 @@
             color: var(--text-light);
             line-height: 1.8;
             overflow-x: hidden;
-            /* perspective: 1500px; */
         }
 
         h1, h2, h3, h4, h5 { font-family: 'Playfair Display', serif; color: var(--gold); }
 
-        /* ОГРОМЕН 3D СИМВОЛ "205" НА ЗАДЕН ФОН - ПО-КОНТРАСТЕН */
+        /* ОГРОМЕН 3D СИМВОЛ "205" НА ЗАДЕН ФОН */
         .bg-205 {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             font-family: 'Playfair Display', serif; font-size: 40vw; font-weight: 900;
-            color: rgba(207, 170, 94, 0.08); /* Оптимален контраст */
+            color: rgba(207, 170, 94, 0.08); 
             z-index: -1; pointer-events: none;
             transform-style: preserve-3d; white-space: nowrap;
             text-shadow: 0 0 30px rgba(207, 170, 94, 0.15);
         }
 
-        /* Навигация - ВИНАГИ ВИДИМА */
+        /* Навигация */
         nav {
             position: absolute; top: 0; left: 0; width: 100%; padding: 20px 5vw; display: flex;
             justify-content: space-between; align-items: center; 
@@ -70,7 +66,18 @@
             top: 0; left: 0; width: 100%;
         }
 
-        .logo { font-size: 1.5rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 900; color: var(--text-light); }
+        .logo { font-size: 1.5rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 900; color: var(--text-light); z-index: 100000; }
+        
+        /* Hamburger Меню Бутон */
+        .menu-toggle {
+            display: none;
+            color: var(--gold);
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 100000;
+            transition: all 0.3s ease;
+        }
+
         .nav-links { display: flex; gap: 25px; list-style: none; }
         .nav-links a { 
             color: var(--text-light); text-decoration: none; font-size: 0.8rem; 
@@ -94,14 +101,14 @@
         }
         .dropdown:hover .dropdown-content { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
 
-        /* Hero секция с Тъмен Портрет */
+        /* Hero секция */
         .hero {
             height: 100vh; display: flex; flex-direction: column; justify-content: center;
             align-items: center; text-align: center; position: relative; padding: 0 20px;
         }
         .hero-bg {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url(r1.webp); /* [СНИМКА_РАКОВСКИ_ФОН: Сложи тук името на файла за фон] */
+            background-image: url(r1.webp);
             background-size: cover; background-position: top center; z-index: -2;
         }
         .hero-overlay {
@@ -120,7 +127,7 @@
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: stretch; margin-bottom: 80px; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-bottom: 60px;}
 
-        /* Текстови Карти (БЕЗ 3D мишка, само скрол) */
+        /* Текстови Карти */
         .text-card {
             background: rgba(17, 17, 17, 0.9); padding: 40px; border-left: 4px solid var(--gold);
             border-radius: 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.7); height: 100%; 
@@ -131,7 +138,7 @@
         .text-card p { margin-bottom: 15px; font-size: 1.05rem; color: var(--text-light); text-align: justify; }
         blockquote { font-style: italic; color: var(--gold); border-left: 3px solid var(--red-accent); padding: 25px; margin: 40px 0; background: rgba(0,0,0,0.5); font-size: 1.2rem; }
 
-        /* Изображения с 3D Hover ефекти (tilt-js) */
+        /* Изображения */
         .img-container {
             width: 100%; height: 100%; min-height: 350px; background: var(--bg-lighter);
             border: 2px solid var(--gold-dim); border-radius: 12px; display: flex; flex-direction: column;
@@ -193,6 +200,7 @@
         .glow-btn:hover span { transform: translateY(-100%); opacity: 0; }
         .glow-btn:hover .hover-text { opacity: 1; transform: translate(-50%, -50%); }
 
+        /* --- МОБИЛНА ВЕРСИЯ (ОПТИМИЗАЦИЯ) --- */
         @media (max-width: 1000px) {
             .grid-2, .grid-3 { grid-template-columns: 1fr; }
             .hero h1 { font-size: 3.5rem; }
@@ -202,8 +210,41 @@
             .timeline-dot { left: 30px; }
             .bg-205 { font-size: 60vw; }
             .glow-btn { padding: 15px 40px; font-size: 1.2rem; }
-            nav { padding: 15px 5vw; flex-wrap: wrap; }
-            .nav-links { gap: 15px; margin-top: 10px;}
+            section { padding: 80px 5vw; } /* Намален padding за мобилни */
+
+            /* Мобилно Меню (Hamburger) */
+            .menu-toggle { display: block; }
+            
+            .nav-links {
+                position: fixed;
+                top: 0; right: -100%; /* Скрито */
+                height: 100vh; width: 250px;
+                background: rgba(10, 10, 10, 0.98);
+                backdrop-filter: blur(15px);
+                flex-direction: column; align-items: center; justify-content: center; gap: 30px;
+                transition: right 0.4s ease;
+                border-left: 2px solid var(--red-accent);
+                z-index: 99998;
+            }
+            .nav-links.nav-active { right: 0; box-shadow: -10px 0 30px rgba(0,0,0,0.8); }
+            .nav-links a { font-size: 1.1rem; }
+
+            /* Скриване на логото в началото само за мобилни */
+            .logo { 
+                opacity: 0; visibility: hidden; transition: all 0.4s ease; 
+            }
+            nav.header-sticky .logo {
+                opacity: 1; visibility: visible;
+            }
+
+            /* Падащо меню "Проекти" за мобилни */
+            .dropdown-content {
+                position: static; transform: none; background: transparent; border: none; box-shadow: none;
+                padding: 10px 0 0 0; text-align: center; display: none; 
+            }
+            .dropdown:hover .dropdown-content {
+                display: block; opacity: 1; visibility: visible; transform: none;
+            }
         }
     </style>
 </head>
@@ -213,7 +254,10 @@
 
     <nav id="navbar">
         <div class="logo">Г.С. Раковски</div>
-        <ul class="nav-links">
+        
+        <div class="menu-toggle" id="mobile-menu">&#9776;</div>
+        
+        <ul class="nav-links" id="nav-links">
             <li><a href="#home">Начало</a></li>
             <li><a href="#bio">Биография</a></li>
             <li><a href="#politics">Дейност</a></li>
@@ -451,8 +495,6 @@
         // 1. Анимации при зареждане
         gsap.from(".gsap-hero", { y: 100, scale: 0.9, opacity: 0, duration: 1.5, stagger: 0.2, ease: "power4.out" });
 
-        
-
         // Fade Up (За по-обикновени елементи)
         gsap.utils.toArray('.gsap-fade-up').forEach(elem => {
             gsap.from(elem, {
@@ -504,10 +546,11 @@
             scrollTrigger: { trigger: ".timeline-container", start: "top center", end: "bottom center", scrub: 1 }
         });
 
-        // 6. ДИНАМИЧЕН 3D TILT ЕФЕКТ (САМО за СНИМКИ, премахнат от текста)
+        // 6. ДИНАМИЧЕН 3D TILT ЕФЕКТ (Изключен за мобилни)
         const tiltElements = document.querySelectorAll('.tilt-js');
         tiltElements.forEach(el => {
             el.addEventListener('mousemove', function(e) {
+                if (window.innerWidth <= 1000) return; // Изключваме за екрани под 1000px
                 const rect = el.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
@@ -522,16 +565,18 @@
             });
             
             el.addEventListener('mouseleave', function() {
+                if (window.innerWidth <= 1000) return;
                 el.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)`;
                 el.style.transition = `transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
             });
             
             el.addEventListener('mouseenter', function() {
+                if (window.innerWidth <= 1000) return;
                 el.style.transition = `none`;
             });
         });
 
-        // 7. Скрол Навигация (Sticky Nav) - ДОБАВЕНО ОБРАТНО ТУК
+        // 7. Скрол Навигация (Sticky Nav)
         function stickyNav() {
             var headerHeight = document.querySelector("#home").offsetHeight / 2;
             var navbar = document.querySelector("#navbar");
@@ -543,8 +588,31 @@
                 navbar.classList.remove("header-sticky");
             }
         }
-
         window.addEventListener("scroll", stickyNav);
+
+        // --- ЛОГИКА ЗА МОБИЛНОТО МЕНЮ ---
+        const mobileMenu = document.getElementById('mobile-menu');
+        const navLinks = document.getElementById('nav-links');
+        const menuItems = document.querySelectorAll('.nav-links a');
+
+        // Отваряне/затваряне на менюто
+        mobileMenu.addEventListener('click', () => {
+            navLinks.classList.toggle('nav-active');
+            
+            if (navLinks.classList.contains('nav-active')) {
+                mobileMenu.innerHTML = '&#10005;'; // X икона
+            } else {
+                mobileMenu.innerHTML = '&#9776;'; // Hamburger икона
+            }
+        });
+
+        // Автоматично затваряне при клик на линк
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navLinks.classList.remove('nav-active');
+                mobileMenu.innerHTML = '&#9776;';
+            });
+        });
         
     </script>
 </body>
