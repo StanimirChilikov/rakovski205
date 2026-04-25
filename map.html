@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пътят на Раковски | Интерактивна Карта</title>
+    <link rel="icon" type="image/png" href="us.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+    <style>
+        :root {
+            --bg-dark: #070707;
+            --text-light: #e0e0e0;
+            --gold: #cfaa5e;
+            --gold-dim: #8a703c;
+            --red-accent: #7a0000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3 { font-family: 'Playfair Display', serif; color: var(--gold); }
+
+        /* Навигация */
+        nav {
+            padding: 20px 5vw; display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(10px); z-index: 1000; 
+            border-bottom: 2px solid var(--red-accent);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+        }
+        .logo { font-size: 1.5rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 900; color: var(--text-light); }
+        .back-btn {
+            color: var(--text-light); text-decoration: none; font-size: 0.9rem; text-transform: uppercase; 
+            letter-spacing: 1px; font-weight: 600; border: 1px solid var(--gold-dim); padding: 10px 20px;
+            border-radius: 5px; transition: 0.3s;
+        }
+        .back-btn:hover { background: var(--gold); color: var(--bg-dark); box-shadow: 0 0 15px rgba(207,170,94,0.4); }
+
+        /* Контейнер за картата */
+        #map-wrapper {
+            flex-grow: 1;
+            position: relative;
+            width: 100%;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Информационен Панел (Стъклен ефект) */
+        #info-panel {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            width: 400px;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--gold-dim);
+            border-radius: 12px;
+            padding: 30px;
+            z-index: 10; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            transform: translateY(150%);
+            opacity: 0;
+            border-left: 4px solid var(--red-accent);
+        }
+
+        .info-year {
+            display: inline-block; background: var(--red-accent); color: white;
+            padding: 5px 12px; border-radius: 5px; font-weight: bold; font-size: 1rem;
+            margin-bottom: 15px; letter-spacing: 1px;
+        }
+        
+        #info-city { font-size: 2.2rem; margin-bottom: 10px; line-height: 1.1; }
+        #info-desc { font-size: 1rem; color: #ccc; line-height: 1.6; text-align: justify; }
+
+        /* Указание за потребителя & Бутон за Обиколка */
+        .top-controls {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 15px; z-index: 10;
+        }
+        
+        .hint-text {
+            background: rgba(0,0,0,0.7); color: var(--gold); padding: 12px 25px;
+            border-radius: 20px; border: 1px solid var(--gold-dim);
+            font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase;
+        }
+
+        .tour-btn {
+            background: var(--red-accent); color: white; padding: 12px 25px; cursor: pointer;
+            border-radius: 20px; border: 1px solid var(--gold); font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; font-weight: bold;
+            transition: all 0.3s; box-shadow: 0 0 15px rgba(122,0,0,0.6);
+        }
+        .tour-btn:hover { background: var(--gold); color: var(--bg-dark); border-color: white; box-shadow: 0 0 20px rgba(207,170,94,0.8);}
+
+        /* ------------------------------------ */
+        /* НОВИ ЕФЕКТИ: ПУЛСАЦИЯ И ЛИНИЯ */
+        /* ------------------------------------ */
+        
+        /* Пулсиращ маркер */
+        .pulse-marker {
+            width: 14px; height: 14px; background: var(--red-accent);
+            border: 2px solid var(--gold); border-radius: 50%;
+            position: relative; box-shadow: 0 0 10px var(--gold);
+        }
+        .pulse-marker::after {
+            content: ''; position: absolute; top: -6px; left: -6px; right: -6px; bottom: -6px;
+            border: 2px solid var(--gold); border-radius: 50%;
+            animation: pulse-glow 2s infinite ease-out;
+        }
+        @keyframes pulse-glow {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+
+        /* Движеща се линия */
+        .animated-path {
+            stroke-dasharray: 12, 12; /* Разстояние между тиретата */
+            animation: march 30s linear infinite; /* Скорост на движение */
+        }
+        @keyframes march {
+            0% { stroke-dashoffset: 1000; }
+            100% { stroke-dashoffset: 0; }
+        }
+
+        /* Мобилна оптимизация */
+        @media (max-width: 768px) {
+            #info-panel { width: calc(100% - 40px); left: 20px; bottom: 20px; padding: 20px; }
+            #info-city { font-size: 1.8rem; }
+            .top-controls { flex-direction: column; width: 90%; align-items: center; gap: 10px; }
+            .hint-text, .tour-btn { width: 100%; text-align: center; font-size: 0.8rem; }
+            nav { padding: 15px 20px; }
+            .logo { font-size: 1.1rem; }
+            .back-btn { padding: 8px 15px; font-size: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">Г.С. Раковски</div>
+        <a href="index.html" class="back-btn">← Към сайта</a>
+    </nav>
+
+    <div id="map-wrapper">
+        <div class="top-controls gsap-hint">
+            <div class="hint-text">Изберете точка от картата</div>
+            <button class="tour-btn" id="tour-btn" onclick="startTour()">▶ Пусни обиколка</button>
+        </div>
+
+        <div id="map"></div>
+        
+        <div id="info-panel">
+            <div class="info-year" id="info-year">1821</div>
+            <h2 id="info-city">Котел</h2>
+            <p id="info-desc">Тук се ражда идеологът на българската революция...</p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <script>
+        gsap.from(".gsap-hint", { y: -50, opacity: 0, duration: 1, delay: 0.5, ease: "power3.out" });
+
+        const map = L.map('map', { zoomControl: false }).setView([43.5, 23.0], 6);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            subdomains: 'abcd',
+            maxZoom: 10,
+            minZoom: 5
+        }).addTo(map);
+
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        const rakovskiPath = [
+            { city: "Котел", coords: [42.8914, 26.4499], year: "1821 г.", desc: "Родното място на Георги Стойков Раковски. Тук той прави първите си стъпки в образованието и попива родолюбивия дух на своето заможно семейство." },
+            { city: "Цариград", coords: [41.0082, 28.9784], year: "1837 - 1841 г.", desc: "Учи в елитната гръцка гимназия в Куручешме. Тук се оформя неговият интелект и се запознава с идеите на Неофит Бозвели. По-късно създава нелегалното 'Тайно общество'." },
+            { city: "Браила", coords: [45.2692, 27.9575], year: "1841 - 1842 г.", desc: "Под името Георги Македон, той участва в организирането на Втория браилски бунт. Заговорът е разкрит, Раковски е осъден на смърт, но успява да избяга." },
+            { city: "Марсилия", coords: [43.2965, 5.3698], year: "1842 г.", desc: "Успява да се спаси след разкриването на браилския бунт, качвайки се на френски кораб, който го отвежда в Марсилия. Прекарва година и половина във Франция." },
+            { city: "Нови Сад", coords: [45.2671, 19.8335], year: "1856 г.", desc: "Тук започва издаването на вестник 'Българска дневница' и завършва поемата си 'Горски пътник', която се превръща в своеобразен наръчник на четническото движение." },
+            { city: "Белград", coords: [44.8125, 20.4612], year: "1862 г.", desc: "Съставя Първия си план за освобождение и сформира Първата българска легия. Българските доброволци, сред които и Васил Левски, получават бойно кръщение тук." },
+            { city: "Букурещ", coords: [44.4268, 26.1025], year: "1867 г.", desc: "Издава 'Привременен закон за народните горски чети'. Изтощен от борбата, Георги Раковски умира тук на 9 октомври 1867 г., оставяйки идеологията за революцията напълно изградена." }
+        ];
+
+        const routeCoords = [];
+        const mapMarkers = [];
+
+        // Custom HTML иконка за Пулсиращия ефект
+        const glowingIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: "<div class='pulse-marker'></div>",
+            iconSize: [14, 14],
+            iconAnchor: [7, 7]
+        });
+
+        rakovskiPath.forEach((location, index) => {
+            routeCoords.push(location.coords);
+
+            // Добавяме новия светещ маркер
+            const marker = L.marker(location.coords, { icon: glowingIcon }).addTo(map);
+            mapMarkers.push(marker);
+
+            marker.on('click', () => {
+                activateLocation(location);
+            });
+        });
+
+        // Функция за отваряне на панела и центриране
+        function activateLocation(location) {
+            const offsetLat = window.innerWidth > 768 ? location.coords[0] : location.coords[0] - 1;
+            map.flyTo([offsetLat, location.coords[1]], 6, { duration: 1.5 });
+
+            document.getElementById('info-year').innerText = location.year;
+            document.getElementById('info-city').innerText = location.city;
+            document.getElementById('info-desc').innerText = location.desc;
+
+            const panel = document.getElementById('info-panel');
+            gsap.fromTo(panel, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" });
+        }
+
+        // Анимирана пунктирана линия
+        const pathLine = L.polyline(routeCoords, {
+            color: '#7a0000',
+            weight: 3,
+            opacity: 0.9,
+            className: 'animated-path' // Свързваме с CSS анимацията
+        }).addTo(map);
+
+        // --- ЛОГИКА ЗА АВТОМАТИЧНАТА ОБИКОЛКА ---
+        let isTourRunning = false;
+        
+        async function startTour() {
+            if(isTourRunning) return; // Предотвратява двойно кликване
+            isTourRunning = true;
+            
+            const btn = document.getElementById('tour-btn');
+            btn.innerText = "Обиколката е активна...";
+            btn.style.background = "var(--gold)";
+            btn.style.color = "var(--bg-dark)";
+
+            for (let i = 0; i < rakovskiPath.length; i++) {
+                if (!isTourRunning) break; // Защита
+                activateLocation(rakovskiPath[i]);
+                await new Promise(r => setTimeout(r, 4500)); // Чака 4.5 секунди на всеки град
+            }
+
+            // Връщане към начален изглед
+            btn.innerText = "▶ Пусни обиколка отново";
+            btn.style.background = "var(--red-accent)";
+            btn.style.color = "white";
+            map.flyTo([43.5, 23.0], 6, { duration: 2 });
+            gsap.to("#info-panel", { y: 150, opacity: 0, duration: 0.5 });
+            isTourRunning = false;
+        }
+
+    </script>
+</body>
+</html>

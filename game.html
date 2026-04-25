@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интерактивна история | Кодът на свободата</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #070707;
+            --bg-panel: rgba(17, 17, 17, 0.85);
+            --text-light: #e0e0e0;
+            --text-muted: #999999;
+            --gold: #cfaa5e;
+            --gold-dim: #8a703c;
+            --red-accent: #7a0000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            height: 100vh;
+            overflow: hidden; /* Скриваме скрола, това е игра */
+            display: flex;
+            flex-direction: column;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+        }
+
+        h1, h2, h3 { font-family: 'Playfair Display', serif; color: var(--gold); }
+
+        /* Навигация (Опростена за връщане назад) */
+        nav {
+            padding: 20px 5vw; display: flex; justify-content: space-between; align-items: center; 
+            background: transparent; z-index: 10; position: absolute; top: 0; width: 100%;
+        }
+        .logo { font-size: 1.5rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 900; color: var(--text-light); }
+        .back-btn {
+            color: var(--text-light); text-decoration: none; font-size: 0.9rem; text-transform: uppercase; 
+            letter-spacing: 1px; font-weight: 600; border: 1px solid var(--gold-dim); padding: 10px 20px;
+            border-radius: 5px; transition: 0.3s;
+        }
+        .back-btn:hover { background: var(--gold); color: var(--bg-dark); }
+
+        /* Контейнер за играта */
+        .game-container {
+            flex-grow: 1; display: flex; justify-content: center; align-items: center;
+            padding: 20px; position: relative; z-index: 5; margin-top: 60px;
+        }
+
+        /* Карта на сцената */
+        .scene-card {
+            background: var(--bg-panel); backdrop-filter: blur(20px); border: 1px solid var(--gold-dim);
+            border-radius: 15px; padding: 50px; max-width: 800px; width: 100%; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            position: absolute; opacity: 0; visibility: hidden; transform: translateY(30px);
+        }
+        
+        .scene-card.active {
+            opacity: 1; visibility: visible; transform: translateY(0);
+        }
+
+        .year-badge {
+            display: inline-block; background: var(--red-accent); color: white; font-weight: bold;
+            padding: 5px 15px; border-radius: 20px; font-size: 1.2rem; margin-bottom: 20px; letter-spacing: 2px;
+        }
+
+        .scene-title { font-size: 2.5rem; margin-bottom: 20px; line-height: 1.2; text-shadow: 0 5px 15px rgba(0,0,0,0.8);}
+        .scene-text { font-size: 1.2rem; margin-bottom: 40px; color: #ccc; line-height: 1.6; }
+
+        /* Бутони за избор */
+        .choices-grid { display: flex; flex-direction: column; gap: 15px; }
+        .choice-btn {
+            background: rgba(20, 20, 20, 0.8); border: 1px solid var(--gold-dim); color: var(--text-light);
+            padding: 20px; font-size: 1.1rem; font-family: 'Montserrat', sans-serif; cursor: pointer;
+            border-radius: 8px; transition: all 0.3s; text-align: left; position: relative; overflow: hidden;
+        }
+        .choice-btn:hover { background: rgba(207, 170, 94, 0.1); border-color: var(--gold); transform: translateX(10px); }
+        .choice-btn::before {
+            content: '►'; position: absolute; left: -20px; color: var(--gold); opacity: 0; transition: all 0.3s;
+        }
+        .choice-btn:hover::before { left: 15px; opacity: 1; }
+        .choice-btn:hover { padding-left: 45px; }
+
+        /* Екран с обратна връзка (Историческата истина) */
+        .feedback-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; visibility: hidden; z-index: 100; text-align: center; padding: 20px;
+        }
+        .feedback-screen h2 { font-size: 3rem; margin-bottom: 20px; }
+        .feedback-screen.correct h2 { color: #4CAF50; } /* Зелено за исторически точно */
+        .feedback-screen.wrong h2 { color: var(--red-accent); } /* Червено за алтернатива */
+        .feedback-text { font-size: 1.3rem; max-width: 700px; color: #ddd; margin-bottom: 40px; line-height: 1.6;}
+        
+        .next-btn {
+            background: var(--gold); color: var(--bg-dark); border: none; padding: 15px 40px;
+            font-size: 1.2rem; font-weight: bold; font-family: 'Montserrat', sans-serif; text-transform: uppercase;
+            cursor: pointer; border-radius: 5px; transition: 0.3s;
+        }
+        .next-btn:hover { background: #fff; box-shadow: 0 0 20px rgba(207, 170, 94, 0.6); }
+
+        @media (max-width: 768px) {
+            .scene-card { padding: 30px 20px; }
+            .scene-title { font-size: 1.8rem; }
+            .scene-text { font-size: 1rem; }
+            .choice-btn { font-size: 0.95rem; padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">Г.С. Раковски</div>
+        <a href="index.html" class="back-btn">← Обратно в сайта</a>
+    </nav>
+
+    <div class="game-container" id="game-container">
+        
+        <div class="scene-card active" id="start-screen">
+            <h1 style="font-size: 3.5rem; margin-bottom: 20px; text-shadow: 0 10px 20px rgba(0,0,0,0.9);">По пътя на Раковски</h1>
+            <p class="scene-text" style="font-style: italic;">Историята не е просто дати и събития. Тя е поредица от тежки решения. Постави се на мястото на патриарха на българската революция. Ще успееш ли да вземеш исторически правилните решения?</p>
+            <button class="next-btn" onclick="startGame()">Започни мисията</button>
+        </div>
+
+        </div>
+
+    <div class="feedback-screen" id="feedback-screen">
+        <h2 id="feedback-title">Резултат</h2>
+        <p class="feedback-text" id="feedback-description">Описание на историческата истина...</p>
+        <button class="next-btn" onclick="nextQuestion()" id="feedback-btn">Продължи напред</button>
+    </div>
+
+    <script>
+        // БАЗА ДАННИ С ИСТОРИЧЕСКИТЕ СИТУАЦИИ
+        const scenarios = [
+            {
+                year: "1842 г.",
+                title: "Вторият браилски бунт",
+                text: "Ти си в Браила (Влашко) под името Георги Македон. Планирал си въстание, но планът е разкрит от полицията. Арестите започват. Какво предприемаш?",
+                choices: [
+                    { text: "Оставаш и се биеш докрай с турците.", isHistorical: false },
+                    { text: "Бягаш нелегално с кораб към Франция.", isHistorical: true },
+                    { text: "Предаваш се на властите, за да спасиш съмишлениците си.", isHistorical: false }
+                ],
+                truth: "Исторически факт: Раковски осъзнава, че бунтът е обречен. Той успява да се качи на френски кораб и избягва в Марсилия, спасявайки живота си, за да продължи борбата по-късно."
+            },
+            {
+                year: "1853 г.",
+                title: "Сянката на Кримската война",
+                text: "Назрява голям конфликт между Русия и Османската империя. Ти си в Цариград. Каква стратегия ще избереш за българите?",
+                choices: [
+                    { text: "Създаваш нелегално 'Тайно общество', което да събира информация за Русия и да готви въстание.", isHistorical: true },
+                    { text: "Съветваш българите да пазят пълен неутралитет, за да не бъдат изклани.", isHistorical: false },
+                    { text: "Обявяваш публично подкрепа за Султана, надявайки се на реформи.", isHistorical: false }
+                ],
+                truth: "Исторически факт: Раковски създава 'Тайното общество'. Дори постъпва като преводач в турската армия, за да шпионира в полза на Русия, показвайки гениална стратегическа мисъл."
+            },
+            {
+                year: "1862 г.",
+                title: "Напрежение в Белград",
+                text: "Сръбско-турските отношения ескалират. Сърбия се готви за война. Как ще се възползваш от ситуацията?",
+                choices: [
+                    { text: "Изчакваш официална заповед от руския император за действие.", isHistorical: false },
+                    { text: "Издаваш позив към народа и събираш Първата българска легия от доброволци.", isHistorical: true },
+                    { text: "Отиваш в Букурещ, защото не вярваш на сръбското правителство.", isHistorical: false }
+                ],
+                truth: "Исторически факт: Раковски издава прочутия си позив и събира над 600 българи (вкл. Левски) в Първата българска легия. Те дори участват в боевете за Белградската крепост."
+            },
+            {
+                year: "1867 г.",
+                title: "Разочарованието",
+                text: "Здравето ти се влошава. Осъзнаваш, че съседните балкански държави (Сърбия, Румъния) гонят само своите интереси и използват българите. Какъв е новият ти план?",
+                choices: [
+                    { text: "Отчайваш се и се оттегляш от политиката.", isHistorical: false },
+                    { text: "Сключваш таен договор с Османската империя за автономия.", isHistorical: false },
+                    { text: "Съставяш закон за народни чети, заявявайки, че българите трябва да се освободят САМИ.", isHistorical: true }
+                ],
+                truth: "Исторически факт: Раковски достига до върха на своята идеология - 'Привременен закон за народните горски чети'. Той прозрява, че чужда помощ не трябва да се чака, и предава този завет на Левски."
+            }
+        ];
+
+        let currentStep = 0;
+        let score = 0;
+
+        function startGame() {
+            gsap.to("#start-screen", { opacity: 0, y: -50, duration: 0.5, onComplete: () => {
+                document.getElementById('start-screen').style.display = 'none';
+                renderScenario(currentStep);
+            }});
+        }
+
+        function renderScenario(index) {
+            const container = document.getElementById('game-container');
+            const data = scenarios[index];
+
+            // Създаваме HTML за конкретната сцена
+            const sceneHTML = `
+                <div class="scene-card" id="scene-${index}">
+                    <div class="year-badge">${data.year}</div>
+                    <h2 class="scene-title">${data.title}</h2>
+                    <p class="scene-text">${data.text}</p>
+                    <div class="choices-grid">
+                        ${data.choices.map((choice, i) => `
+                            <button class="choice-btn" onclick="makeChoice(${index}, ${i})">${choice.text}</button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // Добавяме го към екрана
+            container.insertAdjacentHTML('beforeend', sceneHTML);
+            
+            // Анимираме влизането
+            gsap.to(`#scene-${index}`, { opacity: 1, visibility: 'visible', y: 0, duration: 0.8, ease: "back.out(1.2)" });
+        }
+
+        function makeChoice(scenarioIndex, choiceIndex) {
+            const data = scenarios[scenarioIndex];
+            const choice = data.choices[choiceIndex];
+            
+            const feedbackScreen = document.getElementById('feedback-screen');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackDesc = document.getElementById('feedback-description');
+
+            if(choice.isHistorical) {
+                score++;
+                feedbackScreen.className = 'feedback-screen correct';
+                feedbackTitle.innerText = "Исторически Точно!";
+            } else {
+                feedbackScreen.className = 'feedback-screen wrong';
+                feedbackTitle.innerText = "Алтернативна История";
+            }
+
+            feedbackDesc.innerText = data.truth;
+
+            // Показваме екрана с обратна връзка
+            gsap.to(feedbackScreen, { opacity: 1, visibility: 'visible', duration: 0.5 });
+        }
+
+        function nextQuestion() {
+            // Скриваме екрана с обратна връзка
+            gsap.to("#feedback-screen", { opacity: 0, visibility: 'hidden', duration: 0.5 });
+            
+            // Скриваме старата сцена
+            gsap.to(`#scene-${currentStep}`, { opacity: 0, y: -50, duration: 0.5, onComplete: () => {
+                document.getElementById(`scene-${currentStep}`).remove();
+                
+                currentStep++;
+                
+                if(currentStep < scenarios.length) {
+                    renderScenario(currentStep);
+                } else {
+                    showEndScreen();
+                }
+            }});
+        }
+
+        function showEndScreen() {
+            const container = document.getElementById('game-container');
+            let message = "";
+
+            if(score === scenarios.length) {
+                message = "Перфектно! Ти мислиш досущ като Раковски. Истински стратег и революционер!";
+            } else if (score >= 2) {
+                message = "Добра работа! Разбираш епохата, но някои твои решения биха променили историята.";
+            } else {
+                message = "Балканите през 19 век са сурово място. Твоите решения вероятно биха довели до по-различен край за движението.";
+            }
+
+            const endHTML = `
+                <div class="scene-card active" id="end-screen">
+                    <h1 style="font-size: 3.5rem; margin-bottom: 20px;">Край на пътя</h1>
+                    <h2 style="color: var(--red-accent); margin-bottom: 20px;">Съвпадение с историята: ${score} от ${scenarios.length}</h2>
+                    <p class="scene-text">${message}</p>
+                    <a href="index.html" class="next-btn" style="text-decoration: none; display: inline-block; margin-top: 20px;">Завърши</a>
+                </div>
+            `;
+            container.innerHTML = endHTML;
+            gsap.from("#end-screen", { opacity: 0, scale: 0.8, duration: 1, ease: "elastic.out(1, 0.7)" });
+        }
+    </script>
+</body>
+</html>
