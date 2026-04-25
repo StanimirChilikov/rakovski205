@@ -45,10 +45,12 @@
             z-index: 99999; transition: all 0.4s ease;
         }
 
+        /* Заковаваме лентата най-отгоре */
         nav.header-sticky {
             position: fixed; top: 0; padding: 15px 5vw; background: rgba(5, 5, 5, 0.95); 
             backdrop-filter: blur(15px); border-bottom: 2px solid var(--red-accent); 
             box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+            z-index: 999999 !important; 
         }
 
         .logo { font-size: 1.5rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 900; color: var(--text-light); z-index: 100000; } 
@@ -96,7 +98,7 @@
         section { padding: 80px 5vw; }
         
         .students-section { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; max-width: 1200px; margin: 0 auto 80px auto; }
-        .mentor-section { display: flex; justify-content: center; }
+        .mentor-section { display: flex; justify-content: center; margin-bottom: 60px; }
 
         .team-card {
             background: var(--bg-panel); border: 1px solid var(--gold-dim); border-radius: 12px;
@@ -136,19 +138,20 @@
         /* --- МОБИЛНА ВЕРСИЯ (ОПТИМИЗАЦИЯ) --- */
         @media (max-width: 900px) {
             .menu-toggle {
-                display: block; 
+                display: block !important; 
+                z-index: 1000000 !important; /* Гарантира, че е над всичко */
+                flex-shrink: 0; /* Не позволява да бъде избутано */
             }
-            /* Hides the logo at the top ONLY on mobile */
             .logo { 
                 opacity: 0; 
                 visibility: hidden;
                 transition: all 0.4s ease; 
-    }
-             /* Shows the logo when scrolling down ONLY on mobile */
-             nav.header-sticky .logo {
+                flex-shrink: 0;
+            }
+            nav.header-sticky .logo {
                  opacity: 1;
-                visibility: visible;
-    }
+                 visibility: visible;
+            }
             .nav-links {
                 position: fixed;
                 top: 0;
@@ -284,7 +287,14 @@
                 </div>
             </div>
         </div>
+    </section>
 
+    <section id="feedback-form" style="padding-top: 0px; text-align: center;">
+        <h2 class="gsap-stagger" style="color: var(--gold); font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 30px; text-shadow: 0 5px 15px rgba(0,0,0,0.5);">Оставете ни обратна връзка</h2>
+        
+        <div class="gsap-stagger" style="max-width: 800px; margin: 0 auto; background: var(--bg-panel); border: 1px solid var(--gold-dim); border-radius: 12px; padding: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.5);">
+            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSdQbgJMX0987jfzCYhhU9eMnEe7z1Z2tfWR6P_n-raPOd29-A/viewform?embedded=true" width="100%" height="800" frameborder="0" marginheight="0" marginwidth="0" style="border-radius: 8px;">Зареждане…</iframe>
+        </div>
     </section>
 
     <footer style="text-align: center; padding: 60px 20px 40px 20px; background: #040404; border-top: 2px solid var(--red-accent); position: relative; z-index: 10;">
@@ -300,7 +310,7 @@
         gsap.utils.toArray('.gsap-stagger').forEach((elem, i) => {
             gsap.from(elem, {
                 scrollTrigger: { trigger: elem, start: "top 90%" },
-                y: 100, opacity: 0, duration: 1, delay: i * 0.15, ease: "back.out(1.2)"
+                y: 100, opacity: 0, duration: 1, delay: 0.15, ease: "back.out(1.2)"
             });
         });
 
@@ -308,7 +318,6 @@
         const tiltElements = document.querySelectorAll('.tilt-js');
         tiltElements.forEach(el => {
             el.addEventListener('mousemove', function(e) {
-                // Изключваме tilt ефекта за мобилни устройства, за да не пречи на скролирането
                 if (window.innerWidth <= 900) return; 
 
                 const rect = el.getBoundingClientRect();
